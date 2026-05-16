@@ -1,63 +1,65 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "../config/firebaseConfig";
+import { serverTimestamp } from "firebase/firestore";
+import { createOrder } from "../api/firestoreApi";
+import { useFirebase } from "../context/AppContext";
 import { toast } from "react-toastify";
 
 function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useFirebase();
 
   const product = location.state?.product;
 
   const [isEditing, setIsEditing] = useState(false);
   const [address, setAddress] = useState("Sultanpur, Uttar Pradesh");
   const [phone, setPhone] = useState("8887500048");
+  const [loading, setLoading] = useState(false); // ✅ loading state for button
 
   if (!product) return <h2>No product found</h2>;
 
-  // ✅ Razorpay Payment
-  const handlePayment = () => {
+  // ✅ Direct payment — no Razorpay
+  const handlePayment = async () => {
     if (!address || !phone) {
       toast.warn("Please fill address & phone");
       return;
     }
 
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount: product.price * 100,
-      currency: "INR",
-      name: "Bharat Khajana",
-      description: product.title,
+    setLoading(true);
 
-      handler: async function (response) {
-        try {
-          await addDoc(collection(db, "orders"), {
-            productId: product.id,
-            productName: product.title,
-            price: product.price,
-            address,
-            phone,
-            paymentId: response.razorpay_payment_id,
-            status: "paid",
-            createdAt: serverTimestamp(),
-          });
+    try {
+      const demoPaymentId = "demo_" + Date.now(); // fake payment ID
 
-          toast.success("Payment successful 🎉");
-          navigate("/orders");
-        } catch (err) {
-          console.error(err);
-          toast.error("Order failed");
-        }
-      },
+      await createOrder({
+        userId: user?.userId,
+        productId: product.id,
+        productName: product.title,
+        price: product.price - 50 + 20, // after discount + delivery
+        address,
+        phone,
+        paymentId: demoPaymentId,
+        status: "paid",
+        createdAt: serverTimestamp(),
+      });
 
-      theme: {
-        color: "#FF5F1F",
-      },
-    };
+      toast.success("Payment successful 🎉");
 
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+      navigate("/payment-success", {
+        state: {
+          paymentId: demoPaymentId,
+          productName: product.title,
+          amount: product.price - 50 + 20,
+          address,
+        },
+      });
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Order failed, try again");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,7 +81,6 @@ function Checkout() {
           <div className="bg-white p-4 rounded shadow">
             <div className="flex justify-between items-center">
               <h3 className="font-bold">Deliver to:</h3>
-
               <button
                 onClick={() => setIsEditing(!isEditing)}
                 className="text-blue-500 font-semibold"
@@ -121,18 +122,11 @@ function Checkout() {
               alt={product.title}
               className="w-28 h-28 object-cover"
             />
-
             <div>
               <h2 className="font-semibold text-lg">{product.title}</h2>
               <p className="text-gray-500 text-sm">Seller: Bharat Store</p>
-
-              <div className="mt-2 font-bold text-green-600">
-                ₹{product.price}
-              </div>
-
-              <p className="text-sm text-gray-500">
-                Delivery in 2-3 days
-              </p>
+              <div className="mt-2 font-bold text-green-600">₹{product.price}</div>
+              <p className="text-sm text-gray-500">Delivery in 2-3 days</p>
             </div>
           </div>
         </div>
@@ -145,12 +139,10 @@ function Checkout() {
             <span>Price</span>
             <span>₹{product.price}</span>
           </div>
-
           <div className="flex justify-between py-1 text-green-600">
             <span>Discount</span>
             <span>-₹50</span>
           </div>
-
           <div className="flex justify-between py-1">
             <span>Delivery</span>
             <span>₹20</span>
@@ -163,12 +155,17 @@ function Checkout() {
             <span>₹{product.price - 50 + 20}</span>
           </div>
 
-          {/* 🔥 PAYMENT BUTTON */}
+          {/* ✅ Button shows loading while saving order */}
           <button
             onClick={handlePayment}
-            className="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded font-bold"
+            disabled={loading}
+            className={`mt-4 w-full text-white py-2 rounded font-bold transition-all ${
+              loading
+                ? "bg-yellow-300 cursor-not-allowed"
+                : "bg-yellow-500 hover:bg-yellow-600"
+            }`}
           >
-            Continue to Payment
+            {loading ? "Processing..." : "Continue to Payment"}
           </button>
         </div>
       </div>
@@ -177,3 +174,4 @@ function Checkout() {
 }
 
 export default Checkout;
+

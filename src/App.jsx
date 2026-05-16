@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext.jsx'; // ✅ NEW
 import AppContext from './context/AppContext.jsx';
 import Layout from './Layout.jsx';
 import './index.css';
-
+import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 // Components Imports
 import Main from './components/Main.jsx';
 import Login from './components/Login.jsx';
@@ -20,7 +20,7 @@ import OrderPage from './pages/OrderPage.jsx';
 import OrderHistory from './pages/OrderHistory.jsx';
 import ProductDetails from './pages/ProductDetails';
 import AdminShops from './pages/admin/AdminShops';
-import Checkout from './components/Checkout.jsx';
+import Checkout from './pages/Checkout.jsx';
 
 // ✅ Admin Imports
 import AdminRoute from './components/AdminRoute.jsx';
@@ -48,28 +48,14 @@ const router = createBrowserRouter(
       <Route path='AddYourShop' element={<AddShop/>}/>
       <Route path='manageStore' element={<ManageStore/>}/>
       <Route path='checkout' element={<OrderPage/>}/>
-      <Route path='orderHistory' element={<OrderHistory/>}/>
+      <Route path='orders' element={<OrderHistory/>}/>
+
+      <Route path="/payment-success" element={<PaymentSuccess />} />
       
       {/* Admin Route 🔐 */}
-      <Route 
-        path='admin' 
-        element={
-          <AdminRoute>
-            <AdminDashboard />
-          </AdminRoute>
-        } 
-      />
+      <Route path='admin' element={  <AdminRoute><AdminDashboard /></AdminRoute> }/>
 
-      <Route 
-        path='admin/shops' 
-          element={
-            <AdminRoute>
-              <AdminShops />
-            </AdminRoute>
-  } 
-/>
-     
-    </Route>
+      <Route path='admin/shops' element={<AdminRoute><AdminShops /></AdminRoute>} /></Route>
   )
 );
 
