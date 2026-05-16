@@ -98,7 +98,7 @@ function Navbar() {
                 
                 {isLoggedIn && (
                   <>
-                    <Link to="/orderHistory">
+                    <Link to="/orders">
                       <p className="py-2 px-2 hover:bg-gray-50 rounded">My Orders</p>
                     </Link>
 
