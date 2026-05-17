@@ -1,6 +1,8 @@
 import React from 'react';
 import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext.jsx'; // ✅ NEW
+import { AuthProvider } from './context/AuthContext.jsx';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AppContext from './context/AppContext.jsx';
 import Layout from './Layout.jsx';
 import './index.css';
@@ -49,7 +51,7 @@ const router = createBrowserRouter(
       <Route path='manageStore' element={<ManageStore/>}/>
       <Route path='checkout' element={<OrderPage/>}/>
       <Route path='orders' element={<OrderHistory/>}/>
-
+    
       <Route path="/payment-success" element={<PaymentSuccess />} />
       
       {/* Admin Route 🔐 */}
@@ -64,6 +66,7 @@ function App() {
     <AuthProvider> 
       <AppContext>
         <RouterProvider router={router}/>
+        <ToastContainer autoClose={2000} />
       </AppContext>
     </AuthProvider>
   );

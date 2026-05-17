@@ -26,8 +26,7 @@ function StoreCard({ data, dist }) {
               <h5 className="mb-1 text-lg font-bold tracking-tight text-gray-900 capitalize truncate">
                 {data.storeName}
               </h5>
-              {/* ✅ FIXED: dist already contains "3.4 km" string from
-                  geoDistanceHelper — removed extra " km" that caused "3.4 km km" */}
+              
               {dist && (
                 <span className="ml-2 shrink-0 bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded">
                   {dist}

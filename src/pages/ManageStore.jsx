@@ -108,4 +108,4 @@ function ManageStore() {
   )
 }
 
-export default ManageStore
+export default ManageStore;

@@ -10,16 +10,27 @@ function Checkout() {
   const navigate = useNavigate();
   const { user } = useFirebase();
 
+  // ✅ Single product (product page se) ya cart items (cart se)
   const product = location.state?.product;
+  const cartItems = location.state?.cartItems;
+  const cartTotal = location.state?.total;
+
+  const isCartCheckout = !!cartItems && cartItems.length > 0;
+
+  // ✅ Dono mein se koi ek hona chahiye
+  if (!product && !isCartCheckout) return <h2>No product found</h2>;
+
+  // Price calculations
+  const displayPrice = isCartCheckout ? cartTotal : product.price;
+  const discount = 50;
+  const delivery = 20;
+  const displayTotal = displayPrice - discount + delivery;
 
   const [isEditing, setIsEditing] = useState(false);
   const [address, setAddress] = useState("Sultanpur, Uttar Pradesh");
   const [phone, setPhone] = useState("8887500048");
-  const [loading, setLoading] = useState(false); // ✅ loading state for button
+  const [loading, setLoading] = useState(false);
 
-  if (!product) return <h2>No product found</h2>;
-
-  // ✅ Direct payment — no Razorpay
   const handlePayment = async () => {
     if (!address || !phone) {
       toast.warn("Please fill address & phone");
@@ -29,27 +40,49 @@ function Checkout() {
     setLoading(true);
 
     try {
-      const demoPaymentId = "demo_" + Date.now(); // fake payment ID
+      const demoPaymentId = "demo_" + Date.now();
 
-      await createOrder({
-        userId: user?.userId,
-        productId: product.id,
-        productName: product.title,
-        price: product.price - 50 + 20, // after discount + delivery
-        address,
-        phone,
-        paymentId: demoPaymentId,
-        status: "paid",
-        createdAt: serverTimestamp(),
-      });
+      if (isCartCheckout) {
+        // ✅ Cart se aaya — har item ka alag order banao
+        for (const item of cartItems) {
+          await createOrder({
+            userId: user?.userId,
+            productId: item.id,
+            productName: item.title,
+            price: item.price * item.quantity,
+            quantity: item.quantity,
+            address,
+            phone,
+            paymentId: demoPaymentId,
+            status: "paid",
+            createdAt: serverTimestamp(),
+          });
+        }
+      } else {
+        // ✅ Single product
+        await createOrder({
+          userId: user?.userId,
+          productId: product.id,
+          productName: product.title,
+          price: displayTotal,
+          address,
+          phone,
+          paymentId: demoPaymentId,
+          status: "paid",
+          createdAt: serverTimestamp(),
+        });
+      }
 
       toast.success("Payment successful 🎉");
 
       navigate("/payment-success", {
+        replace: true,
         state: {
           paymentId: demoPaymentId,
-          productName: product.title,
-          amount: product.price - 50 + 20,
+          productName: isCartCheckout
+            ? `${cartItems.length} item${cartItems.length > 1 ? "s" : ""}`
+            : product.title,
+          amount: displayTotal,
           address,
         },
       });
@@ -115,47 +148,70 @@ function Checkout() {
             )}
           </div>
 
-          {/* PRODUCT */}
-          <div className="bg-white p-4 rounded shadow flex gap-4">
-            <img
-              src={product.imageUrl}
-              alt={product.title}
-              className="w-28 h-28 object-cover"
-            />
-            <div>
-              <h2 className="font-semibold text-lg">{product.title}</h2>
-              <p className="text-gray-500 text-sm">Seller: Bharat Store</p>
-              <div className="mt-2 font-bold text-green-600">₹{product.price}</div>
-              <p className="text-sm text-gray-500">Delivery in 2-3 days</p>
+          {/* ✅ Single product display */}
+          {product && (
+            <div className="bg-white p-4 rounded shadow flex gap-4">
+              <img
+                src={product.imageUrl}
+                alt={product.title}
+                className="w-28 h-28 object-cover"
+              />
+              <div>
+                <h2 className="font-semibold text-lg">{product.title}</h2>
+                <p className="text-gray-500 text-sm">Seller: Bharat Store</p>
+                <div className="mt-2 font-bold text-green-600">₹{product.price}</div>
+                <p className="text-sm text-gray-500">Delivery in 2-3 days</p>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* ✅ Cart items display */}
+          {isCartCheckout && cartItems.map((item) => (
+            <div key={item.id} className="bg-white p-4 rounded shadow flex gap-4">
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                className="w-28 h-28 object-cover object-scale-down"
+              />
+              <div>
+                <h2 className="font-semibold text-lg">{item.title}</h2>
+                <p className="text-gray-500 text-sm">Seller: Bharat Store</p>
+                <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
+                <div className="mt-2 font-bold text-green-600">
+                  ₹{item.price * item.quantity}
+                </div>
+                <p className="text-sm text-gray-500">Delivery in 2-3 days</p>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT — Price Details */}
         <div className="bg-white p-4 rounded shadow h-fit">
           <h3 className="font-bold border-b pb-2 mb-2">PRICE DETAILS</h3>
 
           <div className="flex justify-between py-1">
-            <span>Price</span>
-            <span>₹{product.price}</span>
+            <span>Price {isCartCheckout && `(${cartItems.length} items)`}</span>
+            <span>₹{displayPrice}</span>
           </div>
+
           <div className="flex justify-between py-1 text-green-600">
             <span>Discount</span>
-            <span>-₹50</span>
+            <span>-₹{discount}</span>
           </div>
+
           <div className="flex justify-between py-1">
             <span>Delivery</span>
-            <span>₹20</span>
+            <span>₹{delivery}</span>
           </div>
 
           <hr className="my-2" />
 
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
-            <span>₹{product.price - 50 + 20}</span>
+            <span>₹{displayTotal}</span>
           </div>
 
-          {/* ✅ Button shows loading while saving order */}
           <button
             onClick={handlePayment}
             disabled={loading}
@@ -174,4 +230,3 @@ function Checkout() {
 }
 
 export default Checkout;
-
