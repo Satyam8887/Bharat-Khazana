@@ -1,50 +1,109 @@
-// components/StoreCard.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import DisplayRating from './DisplayRating';
-import WhatsAppButton from './WhatsAppButton';
+import React from "react";
+import { Link } from "react-router-dom";
+import DisplayRating from "./DisplayRating";
+import WhatsAppButton from "./WhatsAppButton";
 
 function StoreCard({ data, dist }) {
   return (
-    <div className="md:w-[60%] w-[95%] bg-white rounded-lg border shadow-md hover:shadow-lg hover:scale-[1.01] transition duration-300 overflow-hidden flex flex-row h-32">
+    <div
+      className="w-full bg-white rounded-3xl overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-row"
+      style={{
+        border: "1px solid #F5C89A",
+        boxShadow: "0 4px 20px rgba(180,83,9,0.08)",
+      }}
+    >
 
-      {/* Wrap only the card content (not the WA button) in Link */}
-      <Link to={`/Store?id=${data.id}`} className="flex flex-row flex-1 overflow-hidden">
-        {/* Image Side */}
-        <div className="w-[35%] md:w-[25%] h-full">
+      {/* Card Content */}
+      <Link
+        to={`/Store?id=${data.id}`}
+        className="flex flex-row flex-1 overflow-hidden"
+      >
+
+        {/* Image */}
+        <div
+          className="w-[35%] md:w-[28%] h-[180px] overflow-hidden"
+          style={{ background: "#FEF3C7" }}
+        >
+
           <img
-            className="object-cover w-full h-full"
+            className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
             src={data.storeImage}
             alt={data.storeName}
           />
         </div>
 
-        {/* Content Side */}
-        <div className="flex-1 p-4 flex flex-col justify-between leading-normal overflow-hidden">
+        {/* Content */}
+        <div className="flex-1 p-5 flex flex-col justify-between overflow-hidden">
+
+          {/* Top */}
           <div>
-            <div className="flex justify-between items-start">
-              <h5 className="mb-1 text-lg font-bold tracking-tight text-gray-900 capitalize truncate">
+
+            <div className="flex items-start justify-between gap-3">
+
+              <h5
+                className="text-xl font-bold capitalize font-serif line-clamp-1"
+                style={{ color: "#7C2D12" }}
+              >
                 {data.storeName}
               </h5>
-              
+
               {dist && (
-                <span className="ml-2 shrink-0 bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded">
+                <span
+                  className="shrink-0 text-xs font-semibold px-3 py-1 rounded-full"
+                  style={{
+                    background: "#FEF3C7",
+                    color: "#B45309",
+                  }}
+                >
                   {dist}
                 </span>
               )}
             </div>
-            <p className="mb-1 font-normal text-sm text-gray-700">{data.city}</p>
-            <p className="font-normal text-xs text-gray-500 truncate">{data.storeAddress}</p>
+
+            <p
+              className="text-sm font-medium mt-2 capitalize"
+              style={{ color: "#B45309" }}
+            >
+              📍 {data.city}
+            </p>
+
+            <p
+              className="text-sm mt-2 line-clamp-2 leading-relaxed"
+              style={{ color: "#92400E" }}
+            >
+              {data.storeAddress}
+            </p>
           </div>
 
-          <div className="flex items-center justify-between mt-2">
+          {/* Bottom */}
+          <div className="flex items-center justify-between mt-5">
+
             <DisplayRating rating={data.rating ?? 4} />
-            <span className="text-[#FF5F1F] text-sm font-medium">Visit Store &rarr;</span>
+
+            <span
+              className="text-sm font-semibold"
+              style={{
+                background:
+                  "linear-gradient(to right, #7C2D12, #B45309, #F59E0B)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Visit Store →
+            </span>
+
           </div>
         </div>
       </Link>
 
-      <div className="flex items-center px-3 border-l border-gray-100">
+      {/* WhatsApp Button */}
+      <div
+        className="flex items-center justify-center px-4"
+        style={{
+          borderLeft: "1px solid #F5C89A",
+          background: "#FFF8F0",
+        }}
+      >
         <WhatsAppButton
           shopPhone={data.whatsapp}
           product={{ title: data.storeName }}

@@ -258,6 +258,11 @@ export const deleteProductFromStore = async (productId) => {
   }
 };
 
+export const cancelOrder = async (orderId) => {
+  const orderRef = doc(db, "orders", orderId);
+  await updateDoc(orderRef, { status: "cancelled" });
+};
+
 // ✅ Get ALL Stores (Home Page ke liye)
 export const getAllStores = async () => {
   try {

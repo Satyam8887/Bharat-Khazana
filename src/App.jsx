@@ -23,6 +23,7 @@ import OrderHistory from './pages/OrderHistory.jsx';
 import ProductDetails from './pages/ProductDetails';
 import AdminShops from './pages/admin/AdminShops';
 import Checkout from './pages/Checkout.jsx';
+import ProductView from './components/ProductView.jsx';
 
 // ✅ Admin Imports
 import AdminRoute from './components/AdminRoute.jsx';
@@ -45,6 +46,7 @@ const router = createBrowserRouter(
       <Route path='Shop/product' element={<ProductPage/>}/>
       <Route path='/product/:productId' element={<ProductDetails />} />
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/Shop/product" element={<ProductView />} />
       
       {/* User Routes */}
       <Route path='AddYourShop' element={<AddShop/>}/>

@@ -7,7 +7,7 @@ import Footer from './components/Footer'
 
 function Layout() {
   return (
-    <div className='md:px-10 px-2'>
+    <div className='w-full'>
       <Navbar/>
       <Outlet/>
       <Footer/>

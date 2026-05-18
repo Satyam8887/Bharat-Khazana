@@ -9,8 +9,6 @@ function AddNewProduct({ storeId, onClose, reload, productToEdit }) {
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
 
-  // ✅ FIXED: Track upload phase separately from submit phase so the
-  // spinner shows correctly for both actions without ambiguity.
   const [uploading, setUploading] = useState(false);
 
   const [name, setName] = useState("");
@@ -34,9 +32,8 @@ function AddNewProduct({ storeId, onClose, reload, productToEdit }) {
       setError((prev) => ({ ...prev, image: "Select an image first" }));
       return;
     }
+
     try {
-      // ✅ FIXED: Use separate `uploading` state for the upload button spinner
-      // so it doesn't interfere with the submit button's loading state.
       setUploading(true);
       const url = await uploadImage(image);
       setImageUrl(url);
@@ -50,11 +47,14 @@ function AddNewProduct({ storeId, onClose, reload, productToEdit }) {
 
   const validateDetails = () => {
     const errors = {};
+
     if (name.length < 3) errors.name = "Name too short";
     if (description.length < 5) errors.description = "Description too short";
     if (!price || price <= 0) errors.price = "Invalid price";
     if (!imageUrl) errors.image = "Image is required";
+
     setError(errors);
+
     return Object.keys(errors).length === 0;
   };
 
@@ -63,6 +63,7 @@ function AddNewProduct({ storeId, onClose, reload, productToEdit }) {
     if (!validateDetails()) return;
 
     setLoading(true);
+
     try {
       const productData = {
         title: name,
@@ -89,9 +90,16 @@ function AddNewProduct({ storeId, onClose, reload, productToEdit }) {
   };
 
   return (
-    <section className="bg-gray-50 p-4 rounded-lg">
+    <section
+      className="p-4 rounded-lg"
+      style={{ background: "#FFF8F0" }}
+    >
       <div className="flex flex-col items-center justify-center">
-        <h1 className="text-xl font-bold text-gray-900 mb-4">
+
+        <h1
+          className="text-xl font-bold mb-4"
+          style={{ color: "#7C2D12" }}
+        >
           {productToEdit ? "Edit Product" : "Add New Product"}
         </h1>
 
@@ -99,76 +107,161 @@ function AddNewProduct({ storeId, onClose, reload, productToEdit }) {
 
           {/* Image Upload */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-900">Product Image</label>
+            <label
+              className="block mb-1 text-sm font-medium"
+              style={{ color: "#7C2D12" }}
+            >
+              Product Image
+            </label>
+
             <div className="flex flex-row gap-2 items-center">
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
                   setImage(e.target.files[0]);
-                  // ✅ Reset imageUrl when a new file is picked so the
-                  // upload button goes back to "Upload" state correctly.
                   setImageUrl("");
                 }}
-                className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
+                className="block w-full text-sm rounded-lg cursor-pointer"
+                style={{
+                  background: "#FEF3C7",
+                  border: "1px solid #F5C89A",
+                  color: "#7C2D12",
+                }}
               />
+
               <button
                 onClick={handleImageUpload}
                 type="button"
                 disabled={uploading}
-                className="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-3 py-2 disabled:opacity-60"
+                className="text-white font-medium rounded-lg text-sm px-3 py-2 disabled:opacity-60 transition-all duration-300"
+                style={{
+                  background: "#B45309",
+                }}
               >
-                {/* ✅ FIXED: Now correctly shows spinner during upload only */}
                 {uploading ? <Spinner /> : imageUrl ? "Change" : "Upload"}
               </button>
             </div>
-            {imageUrl && <img src={imageUrl} alt="preview" className="h-16 w-16 mt-2 rounded border" />}
-            {error.image && <p className="text-red-500 text-xs">{error.image}</p>}
+
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt="preview"
+                className="h-16 w-16 mt-2 rounded"
+                style={{
+                  border: "1px solid #F5C89A",
+                }}
+              />
+            )}
+
+            {error.image && (
+              <p className="text-red-500 text-xs">{error.image}</p>
+            )}
           </div>
 
           {/* Name */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-900">Title</label>
+            <label
+              className="block mb-1 text-sm font-medium"
+              style={{ color: "#7C2D12" }}
+            >
+              Title
+            </label>
+
             <input
               type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+              className="text-sm rounded-lg block w-full p-2.5"
+              style={{
+                background: "#FEF3C7",
+                border: "1px solid #F5C89A",
+                color: "#7C2D12",
+              }}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            {error.name && <p className="text-red-500 text-xs">{error.name}</p>}
+
+            {error.name && (
+              <p className="text-red-500 text-xs">{error.name}</p>
+            )}
           </div>
 
           {/* Description */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-900">Description</label>
+            <label
+              className="block mb-1 text-sm font-medium"
+              style={{ color: "#7C2D12" }}
+            >
+              Description
+            </label>
+
             <textarea
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+              className="text-sm rounded-lg block w-full p-2.5"
+              style={{
+                background: "#FEF3C7",
+                border: "1px solid #F5C89A",
+                color: "#7C2D12",
+              }}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
-            {error.description && <p className="text-red-500 text-xs">{error.description}</p>}
+
+            {error.description && (
+              <p className="text-red-500 text-xs">{error.description}</p>
+            )}
           </div>
 
           {/* Price */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-900">Price (₹)</label>
+            <label
+              className="block mb-1 text-sm font-medium"
+              style={{ color: "#7C2D12" }}
+            >
+              Price (₹)
+            </label>
+
             <input
               type="number"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+              className="text-sm rounded-lg block w-full p-2.5"
+              style={{
+                background: "#FEF3C7",
+                border: "1px solid #F5C89A",
+                color: "#7C2D12",
+              }}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
-            {error.price && <p className="text-red-500 text-xs">{error.price}</p>}
+
+            {error.price && (
+              <p className="text-red-500 text-xs">{error.price}</p>
+            )}
           </div>
 
           {/* Out of Stock Toggle */}
-          <div className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-3">
+          <div
+            className="flex items-center justify-between rounded-lg px-4 py-3"
+            style={{
+              background: "#ffffff",
+              border: "1px solid #F5C89A",
+            }}
+          >
             <div>
-              <p className="text-sm font-medium text-gray-900">Stock Status</p>
-              <p className="text-xs text-gray-500">
-                {inStock ? "Product is available for customers" : "Product is hidden as out of stock"}
+              <p
+                className="text-sm font-medium"
+                style={{ color: "#7C2D12" }}
+              >
+                Stock Status
+              </p>
+
+              <p
+                className="text-xs"
+                style={{ color: "#92400E" }}
+              >
+                {inStock
+                  ? "Product is available for customers"
+                  : "Product is hidden as out of stock"}
               </p>
             </div>
+
             <button
               type="button"
               onClick={() => setInStock((prev) => !prev)}
@@ -183,27 +276,31 @@ function AddNewProduct({ storeId, onClose, reload, productToEdit }) {
               />
             </button>
           </div>
+
           <p className="text-center text-xs font-semibold">
-            {inStock
-              ? <span className="text-green-600">✔ In Stock</span>
-              : <span className="text-red-500">✘ Out of Stock</span>
-            }
+            {inStock ? (
+              <span className="text-green-600">✔ In Stock</span>
+            ) : (
+              <span className="text-red-500">✘ Out of Stock</span>
+            )}
           </p>
 
           {/* Submit Button */}
-          {/* ✅ FIXED: Previously `loading && !image` was wrong — after image upload,
-              `image` is still truthy so the spinner never showed on submit.
-              Now simply uses `loading` (submit phase) independently. */}
           <button
             onClick={handleSubmit}
             disabled={loading || uploading}
-            className="w-full text-white bg-[#FF5F1F] hover:bg-orange-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-60"
+            className="w-full text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-60 transition-all duration-300"
+            style={{
+              background:
+                "linear-gradient(to right, #7C2D12, #B45309, #F59E0B)",
+            }}
           >
             {loading
               ? <Spinner />
               : productToEdit ? "Update Product" : "Add Product"
             }
           </button>
+
         </div>
       </div>
     </section>

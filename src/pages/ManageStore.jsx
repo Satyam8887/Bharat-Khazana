@@ -67,45 +67,131 @@ function ManageStore() {
       <Spinner/>
     </div>)
   }
-  return (
-    <div className='mt-16 md:px-10 pb-10'>
-        <div className='flex flex-col items-center justify-center  md:py-10 py-2 bg-white shadow-xl border-0 border-b-2  border-gray-300'>
-      <div className='flex flex-col md:flex-row h-[15%] md:h-[20%] w-[90%] md:w-[60%]  '>
-        <div className='md:w-[50%] w-full h-full'>
-        <img className='rounded-md h-full w-full' src={storeData?.storeImage} alt='store-img'/>
-        </div>
-        <div className='w-full py-2 px-4 gap-3'>
-          <div className='flex flex-row items-center justify-start w-full '>
-            <h1 className='title-font  text-xl  font-medium text-gray-900 mb-2'>{storeData?.storeName}</h1>
+ return (
+  <div className="mt-16 min-h-screen bg-[#F8FAFC] pb-10">
+
+    {/* Store Hero Section */}
+    <div
+      className="w-full py-12 px-4"
+      style={{
+        background: "linear-gradient(to right, #3B82F6, #F59E0B)",
+      }}
+    >
+      <div className="w-full max-w-6xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+
+          <div className="flex flex-col md:flex-row">
+
+            {/* Store Image */}
+            <div className="md:w-[40%] w-full h-[300px]">
+              <img
+                className="w-full h-full object-cover"
+                src={storeData?.storeImage}
+                alt="store-img"
+              />
+            </div>
+
+            {/* Store Details */}
+            <div className="flex-1 p-8 flex flex-col justify-between">
+
+              <div>
+                <h1 className="text-4xl font-bold text-[#1E3A5F] font-serif mb-4">
+                  {storeData?.storeName}
+                </h1>
+
+                <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                  {storeData?.storeAddress}
+                </p>
+
+                <DisplayRating rating={3} />
+              </div>
+
+              <div className="mt-8">
+                <button
+                  onClick={() => setPopupFlag(true)}
+                  className="bg-gradient-to-r from-blue-500 to-amber-500 text-white font-semibold px-8 py-3 rounded-full hover:scale-105 transition-all duration-300 shadow-lg"
+                >
+                  Add Product
+                </button>
+              </div>
+
+            </div>
           </div>
-          <p className='leading-relaxed text-gray-500'>{storeData?.storeAddress} </p>
-          
-         <div className='w-full flex flex-row items-center justify-between'>
-         <DisplayRating rating={3}/>
-         <button onClick={()=>setPopupFlag(true)} className="inline-flex text-white bg-[#FF5F1F] border-0 py-2 px-4 focus:outline-none hover:scale-105 rounded text-base">Add Product</button>
-         </div>
         </div>
       </div>
     </div>
-    
 
-<div className="text-sm font-medium text-center bg-white text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
-    <ul className="flex flex-wrap -mb-px">
-        <li className="me-2">
-            <button onClick={()=>setTabActive(tab=>!tab)}
-             className={`inline-block p-4 border-b-2  rounded-t-lg hover:text-gray-600 hover:border-gray-300  shadow-lg ${(!tabActive)? "text-blue-600  border-blue-600": "border-transparent"}`} >Products</button>
-        </li>
-        <li className="me-2">
-            <button onClick={()=>setTabActive(tab=>!tab)} className={`inline-block p-4 border-b-2 ${(tabActive)? "text-blue-600  border-blue-600": ""} rounded-t-lg active shadow-lg`} aria-current="page">Manage Orders</button>
-        </li>
-       
-    </ul>
-</div>
-  {!tabActive && <ProductList id={storeData?.id} flag={reload}/>}
-  {tabActive && <OrdersList id={storeData?.id} flag={reload}/>}
-  {popupflag &&  <Popup onClose={closePopup} children={<AddNewProduct storeId={storeData?.id} reload={reloadList} onClose={closePopup}/>}/>}
+    {/* Tabs */}
+    <div className="w-full bg-white border-b border-gray-200 shadow-sm">
+
+      <div className="max-w-6xl mx-auto px-4">
+        <ul className="flex flex-wrap">
+
+          {/* Products Tab */}
+          <li>
+            <button
+              onClick={() => setTabActive(false)}
+              className={`px-6 py-4 text-sm font-semibold border-b-2 transition-all duration-200 ${
+                !tabActive
+                  ? "border-blue-500 text-blue-600 bg-blue-50"
+                  : "border-transparent text-gray-500 hover:text-blue-500"
+              }`}
+            >
+              Products
+            </button>
+          </li>
+
+          {/* Orders Tab */}
+          <li>
+            <button
+              onClick={() => setTabActive(true)}
+              className={`px-6 py-4 text-sm font-semibold border-b-2 transition-all duration-200 ${
+                tabActive
+                  ? "border-amber-500 text-amber-600 bg-amber-50"
+                  : "border-transparent text-gray-500 hover:text-amber-500"
+              }`}
+            >
+              Manage Orders
+            </button>
+          </li>
+
+        </ul>
+      </div>
     </div>
-  )
-}
 
+    {/* Main Content */}
+    <div className="max-w-6xl mx-auto px-4 py-8">
+
+      {!tabActive && (
+        <ProductList
+          id={storeData?.id}
+          flag={reload}
+        />
+      )}
+
+      {tabActive && (
+        <OrdersList
+          id={storeData?.id}
+          flag={reload}
+        />
+      )}
+
+    </div>
+
+    {/* Popup */}
+    {popupflag && (
+      <Popup
+        onClose={closePopup}
+        children={
+          <AddNewProduct
+            storeId={storeData?.id}
+            reload={reloadList}
+            onClose={closePopup}
+          />
+        }
+      />
+    )}
+  </div>
+)
+}
 export default ManageStore;

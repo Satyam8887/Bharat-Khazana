@@ -6,9 +6,8 @@ function DisplayRating({ rating }) {
   return (
     <div className="flex items-center gap-0.5">
       {[...Array(maxRating)].map((_, index) => {
-        // Support for half-star rendering
         const filled = index < Math.floor(rating);
-        const half = !filled && index < rating; // e.g. rating = 3.5
+        const half = !filled && index < rating;
 
         return (
           <svg
@@ -16,17 +15,10 @@ function DisplayRating({ rating }) {
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             className="w-5 h-5"
-            // ✅ FIXED: Using fill + stroke approach so empty stars
-            // still show an outline (gray) instead of disappearing.
-            fill={filled ? '#FBBF24' : half ? 'url(#half)' : 'none'}
-            stroke={filled || half ? '#FBBF24' : '#9CA3AF'}
+            fill={filled ? '#F59E0B' : half ? 'url(#half)' : 'none'}
+            stroke={filled || half ? '#B45309' : '#F5C89A'}
             strokeWidth="1.5"
           >
-            {/*
-              ✅ FIXED: The previous `d` path was wrong — it used an
-              irregular polygon that didn't form a proper 5-point star.
-              This is the standard star path used across icon libraries.
-            */}
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -38,7 +30,10 @@ function DisplayRating({ rating }) {
 
       {/* Optional: show numeric rating next to stars */}
       {rating != null && (
-        <span className="ml-1 text-xs text-gray-500 font-medium">
+        <span
+          className="ml-1 text-xs font-medium"
+          style={{ color: "#92400E" }}
+        >
           {Number(rating).toFixed(1)}
         </span>
       )}

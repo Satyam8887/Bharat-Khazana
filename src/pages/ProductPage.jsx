@@ -3,33 +3,38 @@ import { useSearchParams } from 'react-router-dom'
 import { getProductById } from '../api/firestoreApi';
 import ProductView from '../components/ProductView';
 
-
 function ProductPage() {
-  const [searchParms]=useSearchParams();
-  const productId=searchParms.get("id"); 
-  const [product,setProduct]=useState('');
 
-  useEffect(()=>{
+  const [searchParms] = useSearchParams();
+
+  const productId = searchParms.get("id");
+
+  const [product, setProduct] = useState('');
+
+  useEffect(() => {
     fetchProduct();
+  }, [productId]);
 
-  },[productId])
-
-  const fetchProduct=async()=>{
+  const fetchProduct = async () => {
     try {
-      const res=await getProductById(productId);
+
+      const res = await getProductById(productId);
+
       setProduct(res);
-      // console.log(product);
+
     } catch (error) {
       console.log(error);
     }
+  };
 
-  }
-
- 
-
-  return (  
-    <div className='py-16 mt-10'>
-     {product?.id &&  <ProductView product={product}/>}
+  return (
+    <div
+      className='py-16 mt-10 min-h-screen'
+      style={{
+        background: "#FEF3C7",
+      }}
+    >
+      {product?.id && <ProductView product={product} />}
     </div>
   )
 }

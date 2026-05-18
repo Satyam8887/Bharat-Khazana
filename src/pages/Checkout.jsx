@@ -6,45 +6,71 @@ import { useFirebase } from "../context/AppContext";
 import { toast } from "react-toastify";
 
 function Checkout() {
+
   const location = useLocation();
+
   const navigate = useNavigate();
+
   const { user } = useFirebase();
 
   // ✅ Single product (product page se) ya cart items (cart se)
   const product = location.state?.product;
+
   const cartItems = location.state?.cartItems;
+
   const cartTotal = location.state?.total;
 
   const isCartCheckout = !!cartItems && cartItems.length > 0;
 
   // ✅ Dono mein se koi ek hona chahiye
-  if (!product && !isCartCheckout) return <h2>No product found</h2>;
+  if (!product && !isCartCheckout) {
+    return (
+      <h2
+        className="mt-20 text-center text-xl font-semibold"
+        style={{ color: "#7C2D12" }}
+      >
+        No product found
+      </h2>
+    );
+  }
 
   // Price calculations
   const displayPrice = isCartCheckout ? cartTotal : product.price;
+
   const discount = 50;
+
   const delivery = 20;
+
   const displayTotal = displayPrice - discount + delivery;
 
   const [isEditing, setIsEditing] = useState(false);
+
   const [address, setAddress] = useState("Sultanpur, Uttar Pradesh");
+
   const [phone, setPhone] = useState("8887500048");
+
   const [loading, setLoading] = useState(false);
 
   const handlePayment = async () => {
+
     if (!address || !phone) {
+
       toast.warn("Please fill address & phone");
+
       return;
     }
 
     setLoading(true);
 
     try {
+
       const demoPaymentId = "demo_" + Date.now();
 
       if (isCartCheckout) {
+
         // ✅ Cart se aaya — har item ka alag order banao
         for (const item of cartItems) {
+
           await createOrder({
             userId: user?.userId,
             productId: item.id,
@@ -58,7 +84,9 @@ function Checkout() {
             createdAt: serverTimestamp(),
           });
         }
+
       } else {
+
         // ✅ Single product
         await createOrder({
           userId: user?.userId,
@@ -88,141 +116,346 @@ function Checkout() {
       });
 
     } catch (err) {
+
       console.error(err);
+
       toast.error("Order failed, try again");
+
     } finally {
+
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen mt-16 p-4">
+
+    <div
+      className="min-h-screen mt-16 p-4"
+      style={{ background: "#FEF3C7" }}
+    >
 
       {/* STEP BAR */}
-      <div className="bg-white p-4 mb-4 flex justify-center gap-10 font-medium">
-        <span className="text-blue-600">1. Address</span>
-        <span className="text-blue-600">2. Order Summary</span>
-        <span>3. Payment</span>
+      <div
+        className="p-4 mb-4 flex justify-center gap-10 font-medium rounded-xl"
+        style={{
+          background: "#FFF8F0",
+          border: "1px solid #F5C89A",
+        }}
+      >
+
+        <span style={{ color: "#B45309" }}>
+          1. Address
+        </span>
+
+        <span style={{ color: "#B45309" }}>
+          2. Order Summary
+        </span>
+
+        <span style={{ color: "#92400E" }}>
+          3. Payment
+        </span>
+
       </div>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-3 gap-4">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* LEFT */}
-        <div className="col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-4">
 
           {/* ADDRESS */}
-          <div className="bg-white p-4 rounded shadow">
+          <div
+            className="p-4 rounded-2xl shadow"
+            style={{
+              background: "#FFF8F0",
+              border: "1px solid #F5C89A",
+              boxShadow: "0 4px 20px rgba(180,83,9,0.08)",
+            }}
+          >
+
             <div className="flex justify-between items-center">
-              <h3 className="font-bold">Deliver to:</h3>
+
+              <h3
+                className="font-bold"
+                style={{ color: "#7C2D12" }}
+              >
+                Deliver to:
+              </h3>
+
               <button
                 onClick={() => setIsEditing(!isEditing)}
-                className="text-blue-500 font-semibold"
+                className="font-semibold"
+                style={{ color: "#B45309" }}
               >
                 {isEditing ? "Save" : "Change"}
               </button>
+
             </div>
 
             {!isEditing ? (
+
               <>
-                <p className="font-semibold mt-2">Satya</p>
-                <p className="text-gray-600 text-sm">{address}</p>
-                <p className="text-gray-600 text-sm">{phone}</p>
+                <p
+                  className="font-semibold mt-2"
+                  style={{ color: "#7C2D12" }}
+                >
+                  Satya
+                </p>
+
+                <p
+                  className="text-sm"
+                  style={{ color: "#92400E" }}
+                >
+                  {address}
+                </p>
+
+                <p
+                  className="text-sm"
+                  style={{ color: "#92400E" }}
+                >
+                  {phone}
+                </p>
               </>
+
             ) : (
+
               <div className="mt-3 space-y-2">
+
                 <input
                   type="text"
                   placeholder="Enter Address"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full border p-2 rounded"
+                  className="w-full p-2 rounded outline-none"
+                  style={{
+                    border: "1px solid #F5C89A",
+                    background: "#FEF3C7",
+                    color: "#7C2D12",
+                  }}
                 />
+
                 <input
                   type="text"
                   placeholder="Phone Number"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full border p-2 rounded"
+                  className="w-full p-2 rounded outline-none"
+                  style={{
+                    border: "1px solid #F5C89A",
+                    background: "#FEF3C7",
+                    color: "#7C2D12",
+                  }}
                 />
+
               </div>
             )}
           </div>
 
           {/* ✅ Single product display */}
           {product && (
-            <div className="bg-white p-4 rounded shadow flex gap-4">
+
+            <div
+              className="p-4 rounded-2xl shadow flex gap-4"
+              style={{
+                background: "#FFF8F0",
+                border: "1px solid #F5C89A",
+              }}
+            >
+
               <img
                 src={product.imageUrl}
                 alt={product.title}
-                className="w-28 h-28 object-cover"
+                className="w-28 h-28 object-cover rounded-xl"
+                style={{
+                  border: "1px solid #F5C89A",
+                  background: "#FEF3C7",
+                }}
               />
+
               <div>
-                <h2 className="font-semibold text-lg">{product.title}</h2>
-                <p className="text-gray-500 text-sm">Seller: Bharat Store</p>
-                <div className="mt-2 font-bold text-green-600">₹{product.price}</div>
-                <p className="text-sm text-gray-500">Delivery in 2-3 days</p>
+
+                <h2
+                  className="font-semibold text-lg"
+                  style={{ color: "#7C2D12" }}
+                >
+                  {product.title}
+                </h2>
+
+                <p
+                  className="text-sm"
+                  style={{ color: "#92400E" }}
+                >
+                  Seller: Bharat Store
+                </p>
+
+                <div
+                  className="mt-2 font-bold"
+                  style={{ color: "#B45309" }}
+                >
+                  ₹{product.price}
+                </div>
+
+                <p
+                  className="text-sm"
+                  style={{ color: "#92400E" }}
+                >
+                  Delivery in 2-3 days
+                </p>
+
               </div>
             </div>
           )}
 
           {/* ✅ Cart items display */}
           {isCartCheckout && cartItems.map((item) => (
-            <div key={item.id} className="bg-white p-4 rounded shadow flex gap-4">
+
+            <div
+              key={item.id}
+              className="p-4 rounded-2xl shadow flex gap-4"
+              style={{
+                background: "#FFF8F0",
+                border: "1px solid #F5C89A",
+              }}
+            >
+
               <img
                 src={item.imageUrl}
                 alt={item.title}
-                className="w-28 h-28 object-cover object-scale-down"
+                className="w-28 h-28 object-cover object-scale-down rounded-xl"
+                style={{
+                  border: "1px solid #F5C89A",
+                  background: "#FEF3C7",
+                }}
               />
+
               <div>
-                <h2 className="font-semibold text-lg">{item.title}</h2>
-                <p className="text-gray-500 text-sm">Seller: Bharat Store</p>
-                <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
-                <div className="mt-2 font-bold text-green-600">
+
+                <h2
+                  className="font-semibold text-lg"
+                  style={{ color: "#7C2D12" }}
+                >
+                  {item.title}
+                </h2>
+
+                <p
+                  className="text-sm"
+                  style={{ color: "#92400E" }}
+                >
+                  Seller: Bharat Store
+                </p>
+
+                <p
+                  className="text-sm"
+                  style={{ color: "#92400E" }}
+                >
+                  Qty: {item.quantity}
+                </p>
+
+                <div
+                  className="mt-2 font-bold"
+                  style={{ color: "#B45309" }}
+                >
                   ₹{item.price * item.quantity}
                 </div>
-                <p className="text-sm text-gray-500">Delivery in 2-3 days</p>
+
+                <p
+                  className="text-sm"
+                  style={{ color: "#92400E" }}
+                >
+                  Delivery in 2-3 days
+                </p>
+
               </div>
             </div>
           ))}
         </div>
 
         {/* RIGHT — Price Details */}
-        <div className="bg-white p-4 rounded shadow h-fit">
-          <h3 className="font-bold border-b pb-2 mb-2">PRICE DETAILS</h3>
+        <div
+          className="p-4 rounded-2xl shadow h-fit"
+          style={{
+            background: "#FFF8F0",
+            border: "1px solid #F5C89A",
+            boxShadow: "0 4px 20px rgba(180,83,9,0.08)",
+          }}
+        >
+
+          <h3
+            className="font-bold border-b pb-2 mb-2"
+            style={{
+              color: "#7C2D12",
+              borderColor: "#F5C89A",
+            }}
+          >
+            PRICE DETAILS
+          </h3>
 
           <div className="flex justify-between py-1">
-            <span>Price {isCartCheckout && `(${cartItems.length} items)`}</span>
-            <span>₹{displayPrice}</span>
+
+            <span style={{ color: "#92400E" }}>
+              Price {isCartCheckout && `(${cartItems.length} items)`}
+            </span>
+
+            <span style={{ color: "#7C2D12" }}>
+              ₹{displayPrice}
+            </span>
+
           </div>
 
-          <div className="flex justify-between py-1 text-green-600">
+          <div
+            className="flex justify-between py-1"
+            style={{ color: "#B45309" }}
+          >
+
             <span>Discount</span>
+
             <span>-₹{discount}</span>
+
           </div>
 
           <div className="flex justify-between py-1">
-            <span>Delivery</span>
-            <span>₹{delivery}</span>
+
+            <span style={{ color: "#92400E" }}>
+              Delivery
+            </span>
+
+            <span style={{ color: "#7C2D12" }}>
+              ₹{delivery}
+            </span>
+
           </div>
 
-          <hr className="my-2" />
+          <hr
+            className="my-2"
+            style={{ borderColor: "#F5C89A" }}
+          />
 
-          <div className="flex justify-between font-bold text-lg">
+          <div
+            className="flex justify-between font-bold text-lg"
+            style={{ color: "#7C2D12" }}
+          >
+
             <span>Total</span>
-            <span>₹{displayTotal}</span>
+
+            <span style={{ color: "#B45309" }}>
+              ₹{displayTotal}
+            </span>
+
           </div>
 
           <button
             onClick={handlePayment}
             disabled={loading}
-            className={`mt-4 w-full text-white py-2 rounded font-bold transition-all ${
-              loading
-                ? "bg-yellow-300 cursor-not-allowed"
-                : "bg-yellow-500 hover:bg-yellow-600"
-            }`}
+            className="mt-4 w-full text-white py-2 rounded-xl font-bold transition-all"
+            style={{
+              background: loading
+                ? "#F5C89A"
+                : "linear-gradient(to right, #7C2D12, #B45309, #F59E0B)",
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
           >
             {loading ? "Processing..." : "Continue to Payment"}
           </button>
+
         </div>
       </div>
     </div>

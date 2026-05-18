@@ -1,80 +1,329 @@
-import React, { useEffect, useState } from 'react'
-import { getOrderListForAdmin } from '../api/firestoreApi';
-import Status from './Status';
+import React, { useEffect, useState } from "react";
+import { getOrderListForAdmin } from "../api/firestoreApi";
+import Status from "./Status";
 
-function OrdersList({id, flag}) {
-    const [orders,setOrders]=useState([]);
-    
+import {
+  FaMapMarkerAlt,
+  FaTimesCircle,
+  FaBoxOpen,
+} from "react-icons/fa";
 
-    useEffect(()=>{
-        fetchOrders();
-    },[id,flag])
+function OrdersList({ id, flag }) {
 
+  const [orders, setOrders] = useState([]);
 
-    const fetchOrders=async()=>{
-        try {
-            const res=await getOrderListForAdmin(id);
-            setOrders(res);
-            // console.log("list",res);
-        } catch (error) {
-            console.log(error);
+  const [cancelPopup, setCancelPopup] = useState(false);
 
+  const [cancelReason, setCancelReason] = useState("");
 
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
+  useEffect(() => {
+    fetchOrders();
+  }, [id, flag]);
 
-            
-        }
+  const fetchOrders = async () => {
+    try {
+
+      const res = await getOrderListForAdmin(id);
+
+      setOrders(res);
+
+    } catch (error) {
+      console.log(error);
     }
+  };
 
-   
+  // ================= CANCEL ORDER =================
 
-    
+  const handleCancelOrder = async () => {
+
+    try {
+
+      await updateOrderStatus(selectedOrder?.id, {
+        status: "Cancelled",
+        cancelReason: cancelReason,
+      });
+
+      setCancelPopup(false);
+
+      setCancelReason("");
+
+      setSelectedOrder(null);
+
+      fetchOrders();
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
-    <div>
-        {orders && orders.length!==0 && orders.map((data)=>(
-          <div key={data.id} className='w-full  '>
-          <div className='my-3 bg-gray-100 py-2  pl-3 '>
-          <p className="text-base dark:text-white xl:text-lg leading-6">{data?.time?.date}({data?.time?.time})</p>
-          </div>
-          <div  className='flex flex-col md:flex-row items-center justify-between mt-4 border-b border-gray-200 px-2 py-3 shadow-md md:gap-0 gap-3'>
-              <div className='w-full md:w-[35%] flex flex-row items-start gap-10'>
-                <div className='w-[40%]'>
-                <img className="w-full max-h-32 object-scale-down" src={data?.productDetails?.imageUrl} alt="dress" />
-                </div>
-                <div className='w-[60%]'>
-                <h3 className="text-xm  font-semibold leading-6 text-gray-800">{data?.productDetails?.title}</h3>
-                <p className="text-sm dark:text-white  leading-6 text-gray-800">Price &#8377;{data?.productDetails?.price}</p>
-              <div className="flex justify-center md:justify-start items-center md:items-start flex-col space-y-4 xl:mt-8">
-              <p className="text-base dark:text-white font-semibold leading-4 text-center md:text-left text-gray-800">Shipping Address</p>
-              <p className="w-48 lg:w-full dark:text-gray-300 xl:w-48 text-center md:text-left text-sm leading-5 text-gray-600">{data?.address?.name}, mobile- {data?.address?.mobile} ,{data?.address?.address}</p>
-                </div>
-                </div>
-              </div>
-              <div className="w-full md:w-[40%] flex flex-col md:flex-row  justify-between  items-start md:gap-0 gap-3 ">
-              <div className='flex flex-row justify-between  md:w-auto
-              w-full md:flex-col gap-10  h-full'>
-              <p className="text-base dark:text-white xl:text-lg leading-6">Status: <span className="md:text-left text-sm leading-5 text-gray-600">{data?.status}</span></p>
-              <Status id={data?.id} fetchOrders={fetchOrders}/>
-              </div> 
-              <div className='flex flex-row justify-between  md:w-auto
-              w-full md:flex-col gap-10  h-full'>
-              <p className="text-base dark:text-white xl:text-lg leading-6 text-gray-800">Q-{data?.productDetails?.quantity}</p>
-              </div>
-              <div className='flex flex-row justify-between  md:w-auto
-              w-full md:flex-col gap-10  h-full'>
-              <div>
-              {/* <p className="text-sm dark:text-white  leading-6 text-gray-800">Price ${data?.productDetails?.price}</p> */}
-              <p className="text-base dark:text-white xl:text-lg font-semibold leading-6 text-gray-800">Total &#8377;{(data?.productDetails?.quantity * data?.productDetails?.price)}</p>
-              </div>
-              <a href={`https://www.google.com/maps/search/${data?.address?.geoLocation?.latitude},+${data?.address?.geoLocation?.longitude}/@${data?.address?.geoLocation?.latitude},${data?.address?.geoLocation?.longitude},13z?entry=ttu`} target='blank'><button className='border border-black px-2 py-1'>Geo Location</button></a>
-              </div>
+    <div className="w-full">
+
+      {orders &&
+        orders.length !== 0 &&
+        orders.map((data) => (
+
+          <div key={data.id} className="w-full">
+
+            {/* Date Header */}
+            <div
+              className="my-5 py-3 px-5 rounded-2xl text-white font-semibold shadow-md"
+              style={{
+                background:
+                  "linear-gradient(to right, #7C2D12, #B45309, #F59E0B)",
+              }}
+            >
+              <p className="text-base">
+                {data?.time?.date} ({data?.time?.time})
+              </p>
             </div>
+
+            {/* Order Card */}
+            <div
+              className="flex flex-col md:flex-row items-start justify-between rounded-3xl p-5 gap-6 hover:shadow-2xl transition-all duration-300"
+              style={{
+                background: "#FFF8F0",
+                border: "1px solid #F5C89A",
+                boxShadow: "0 8px 24px rgba(180,83,9,0.08)",
+              }}
+            >
+
+              {/* LEFT SIDE */}
+              <div className="w-full md:w-[40%] flex gap-5">
+
+                {/* Image */}
+                <div
+                  className="w-[120px] h-[120px] rounded-2xl overflow-hidden"
+                  style={{
+                    background: "#FEF3C7",
+                    border: "1px solid #F5C89A",
+                  }}
+                >
+
+                  <img
+                    className="w-full h-full object-contain"
+                    src={data?.productDetails?.imageUrl}
+                    alt="product"
+                  />
+                </div>
+
+                {/* Details */}
+                <div className="flex-1">
+
+                  <h3
+                    className="text-xl font-bold font-serif"
+                    style={{ color: "#7C2D12" }}
+                  >
+                    {data?.productDetails?.title}
+                  </h3>
+
+                  <p
+                    className="mt-2"
+                    style={{ color: "#92400E" }}
+                  >
+                    Price ₹{data?.productDetails?.price}
+                  </p>
+
+                  {/* Address */}
+                  <div className="mt-5">
+
+                    <p
+                      className="font-semibold mb-2"
+                      style={{ color: "#7C2D12" }}
+                    >
+                      Shipping Address
+                    </p>
+
+                    <p
+                      className="text-sm leading-relaxed"
+                      style={{ color: "#92400E" }}
+                    >
+                      {data?.address?.name},
+                      Mobile - {data?.address?.mobile},
+                      {data?.address?.address}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT SIDE */}
+              <div className="w-full md:w-[45%] flex flex-col gap-5">
+
+                {/* Status */}
+                <div className="flex items-center justify-between">
+
+                  <p
+                    className="text-lg font-semibold"
+                    style={{ color: "#7C2D12" }}
+                  >
+                    Status:
+                    <span
+                      className="ml-2"
+                      style={{ color: "#92400E" }}
+                    >
+                      {data?.status}
+                    </span>
+                  </p>
+
+                  <Status
+                    id={data?.id}
+                    fetchOrders={fetchOrders}
+                  />
+                </div>
+
+                {/* Quantity + Total */}
+                <div className="flex items-center justify-between">
+
+                  <p
+                    className="font-medium"
+                    style={{ color: "#92400E" }}
+                  >
+                    Quantity:
+                    <span className="ml-2">
+                      {data?.productDetails?.quantity}
+                    </span>
+                  </p>
+
+                  <p
+                    className="text-xl font-bold"
+                    style={{ color: "#B45309" }}
+                  >
+                    ₹
+                    {data?.productDetails?.quantity *
+                      data?.productDetails?.price}
+                  </p>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex flex-wrap gap-3">
+
+                  {/* Geo Location */}
+                  <a
+                    href={`https://www.google.com/maps/search/${data?.address?.geoLocation?.latitude},+${data?.address?.geoLocation?.longitude}/@${data?.address?.geoLocation?.latitude},${data?.address?.geoLocation?.longitude},13z?entry=ttu`}
+                    target="blank"
+                  >
+                    <button
+                      className="flex items-center gap-2 px-5 py-2 rounded-full text-white font-medium hover:scale-105 transition-all duration-300"
+                      style={{
+                        background:
+                          "linear-gradient(to right, #7C2D12, #B45309, #F59E0B)",
+                      }}
+                    >
+                      <FaMapMarkerAlt />
+                      Geo Location
+                    </button>
+                  </a>
+
+                  {/* Cancel */}
+                  {data?.status !== "Cancelled" && (
+                    <button
+                      onClick={() => {
+                        setSelectedOrder(data);
+                        setCancelPopup(true);
+                      }}
+                      className="flex items-center gap-2 px-5 py-2 rounded-full bg-red-500 text-white font-medium hover:bg-red-600 transition-all duration-300"
+                    >
+                      <FaTimesCircle />
+                      Cancel Order
+                    </button>
+                  )}
+                </div>
+
+                {/* Cancel Reason */}
+                {data?.cancelReason && (
+                  <div
+                    className="border rounded-2xl p-4"
+                    style={{
+                      background: "#FFF1F2",
+                      borderColor: "#FCA5A5",
+                    }}
+                  >
+
+                    <p className="font-semibold text-red-600 mb-1">
+                      Cancellation Reason
+                    </p>
+
+                    <p className="text-sm text-red-500">
+                      {data?.cancelReason}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}
+
+      {/* ================= POPUP ================= */}
+
+      {cancelPopup && (
+
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+
+          <div
+            className="rounded-3xl shadow-2xl w-[90%] max-w-md p-6"
+            style={{
+              background: "#FFF8F0",
+              border: "1px solid #F5C89A",
+            }}
+          >
+
+            <h2
+              className="text-2xl font-bold mb-4 font-serif"
+              style={{ color: "#7C2D12" }}
+            >
+              Cancel Order
+            </h2>
+
+            <textarea
+              value={cancelReason}
+              onChange={(e) =>
+                setCancelReason(e.target.value)
+              }
+              placeholder="Write cancellation reason..."
+              className="w-full rounded-2xl p-4 outline-none min-h-[120px]"
+              style={{
+                border: "1px solid #F5C89A",
+                background: "#FEF3C7",
+                color: "#7C2D12",
+              }}
+            />
+
+            <div className="flex justify-end gap-3 mt-5">
+
+              <button
+                onClick={() => {
+                  setCancelPopup(false);
+                  setCancelReason("");
+                }}
+                className="px-5 py-2 rounded-full"
+                style={{
+                  background: "#FEF3C7",
+                  color: "#7C2D12",
+                  border: "1px solid #F5C89A",
+                }}
+              >
+                Close
+              </button>
+
+              <button
+                onClick={handleCancelOrder}
+                className="px-5 py-2 rounded-full text-white font-semibold"
+                style={{
+                  background:
+                    "linear-gradient(to right, #EF4444, #DC2626)",
+                }}
+              >
+                Confirm Cancel
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-export default OrdersList
+export default OrdersList;
