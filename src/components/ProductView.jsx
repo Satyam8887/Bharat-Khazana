@@ -2,11 +2,13 @@ import React from 'react';
 import { useState } from 'react';
 import DisplayRating from './DisplayRating'
 import { useFirebase } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 
 function ProductView({ product }) {
 
   const { addToCart } = useFirebase();
+  const navigate = useNavigate();
 
   const [currentImage, setCurrentImage] = useState(0);
 
@@ -24,6 +26,16 @@ function ProductView({ product }) {
         position: toast.POSITION.TOP_LEFT
       });
     }
+  };
+
+  const handleBuyNow = (data) => {
+
+    if (!inStock || !data?.id) return;
+
+    addToCart(data);
+
+    // Pass the product via state so the checkout page can read it immediately
+    navigate("/checkout", { state: { product: data } });
   };
 
   const productImages =
@@ -338,6 +350,7 @@ function ProductView({ product }) {
 
                 {/* Buy Now */}
                 <button
+                  onClick={() => handleBuyNow(product)}
                   disabled={!inStock}
                   className={`flex-1 py-4 rounded-full border-2 font-semibold text-lg transition-all duration-300 ${
                     !inStock && "border-gray-200 text-gray-400 cursor-not-allowed"
