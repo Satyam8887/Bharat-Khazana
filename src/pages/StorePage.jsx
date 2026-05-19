@@ -89,7 +89,7 @@ function StorePage() {
       setStores(res || []);
 
       if (res && res.length === 0) {
-        toast.error("Is city mein koi shop nahi mili.");
+        toast.error("Does not found.");
       }
 
     } catch (err) {
